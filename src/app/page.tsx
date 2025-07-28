@@ -105,31 +105,29 @@ export default function MermaidVisualizerPage() {
       });
       return;
     }
+    
+    const scale = 2; // Increase resolution
+    const padding = 20 * scale;
 
     const img = new Image();
-    // Use a data URI to prevent canvas tainting
     const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 
     img.onload = () => {
-      // Use the natural dimensions of the SVG
       const { width, height } = img;
-      canvas.width = width + 40; // Add padding
-      canvas.height = height + 40; // Add padding
-
-      // Fill background
+      canvas.width = width * scale + padding * 2;
+      canvas.height = height * scale + padding * 2;
+      
       ctx.fillStyle = "#FAFAFA";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.drawImage(img, padding, padding, width * scale, height * scale);
 
-      // Draw image in the center of the padding
-      ctx.drawImage(img, 20, 20);
-
-      // Export and download
       const pngUrl = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = pngUrl;
       a.download = "mermaid-diagram.png";
       document.body.appendChild(a);
-      a.click();
+a.click();
       document.body.removeChild(a);
     };
 
@@ -141,7 +139,7 @@ export default function MermaidVisualizerPage() {
       });
     };
 
-    img.crossOrigin = "anonymous"; // Necessary for canvas tainting prevention
+    img.crossOrigin = "anonymous";
     img.src = url;
   };
 
