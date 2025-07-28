@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import mermaid from "mermaid";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,7 @@ import {
   CheckCircle,
   Loader2,
   AlertCircle,
+  Code2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -117,7 +119,9 @@ export default function MermaidVisualizerPage() {
       canvas.width = width * scale + padding * 2;
       canvas.height = height * scale + padding * 2;
       
-      ctx.fillStyle = "#FAFAFA";
+      // Use the page background color for the canvas
+      const pageBgColor = getComputedStyle(document.body).getPropertyValue('--background').trim();
+      ctx.fillStyle = `hsl(${pageBgColor})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       ctx.drawImage(img, padding, padding, width * scale, height * scale);
@@ -149,9 +153,12 @@ export default function MermaidVisualizerPage() {
     <div className="flex flex-col min-h-screen bg-background text-foreground font-body">
       <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
-          <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl font-headline">
-            Mermaid Visualizer
-          </h1>
+          <div className="flex items-center gap-2">
+            <Code2 className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl font-headline">
+              Mermaid Visualizer
+            </h1>
+          </div>
           <Button onClick={handleDownload} disabled={!svg || !!error}>
             <Download className="mr-2 h-4 w-4" />
             Download PNG
@@ -163,7 +170,7 @@ export default function MermaidVisualizerPage() {
         <div className="container mx-auto p-4 md:p-8">
           <div className="grid gap-8 md:grid-cols-2">
             <div className="flex flex-col gap-4">
-              <Card className="h-full">
+              <Card className="h-full shadow-lg">
                 <CardHeader>
                   <CardTitle className="font-headline">Mermaid Code</CardTitle>
                   <CardDescription>
@@ -175,14 +182,14 @@ export default function MermaidVisualizerPage() {
                   <Textarea
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    className="min-h-[400px] font-mono text-sm resize-y"
+                    className="min-h-[400px] font-mono text-sm resize-y focus:ring-1 focus:ring-primary"
                     placeholder="graph TD; A-->B;"
                   />
                 </CardContent>
               </Card>
 
               {isLoading || error ? (
-                <Alert variant={error ? "destructive" : "default"}>
+                <Alert variant={error ? "destructive" : "default"} className="shadow-md">
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -197,8 +204,8 @@ export default function MermaidVisualizerPage() {
                   </AlertDescription>
                 </Alert>
               ) : (
-                <Alert>
-                  <CheckCircle className="h-4 w-4" />
+                <Alert className="shadow-md">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
                   <AlertTitle className="font-headline">All Good!</AlertTitle>
                   <AlertDescription>
                     Your Mermaid code is valid. The preview is on the right.
@@ -208,7 +215,7 @@ export default function MermaidVisualizerPage() {
             </div>
 
             <div className="flex flex-col">
-              <Card className="h-full">
+              <Card className="h-full shadow-lg">
                 <CardHeader>
                   <CardTitle className="font-headline">Preview</CardTitle>
                   <CardDescription>
@@ -216,7 +223,7 @@ export default function MermaidVisualizerPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="relative min-h-[400px] w-full rounded-md border bg-white p-4 transition-all duration-300 flex items-center justify-center overflow-auto">
+                  <div className="relative min-h-[400px] w-full rounded-md border bg-card p-4 transition-all duration-300 flex items-center justify-center overflow-auto">
                     {isRendering && (
                       <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -239,6 +246,9 @@ export default function MermaidVisualizerPage() {
           <p className="text-center text-sm leading-loose text-muted-foreground">
             Built with Next.js and ShadCN/UI.
           </p>
+          <Link href="https://namanchaturvedi.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+            About me
+          </Link>
         </div>
       </footer>
     </div>

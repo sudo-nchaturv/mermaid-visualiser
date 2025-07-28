@@ -1,4 +1,5 @@
 import type {Metadata} from 'next';
+import { Inter, Space_Grotesk as SpaceGrotesk } from 'next/font/google'
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
@@ -7,17 +8,24 @@ export const metadata: Metadata = {
   description: 'Visualize Mermaid.js charts with real-time preview and AI error detection.',
 };
 
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+})
+
+const spaceGrotesk = SpaceGrotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet"></link>
       </head>
       <body className="font-body antialiased">
         {children}
