@@ -107,19 +107,23 @@ export default function MermaidVisualizerPage() {
     }
 
     const img = new Image();
-    const svgBlob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(svgBlob);
+    // Use a data URI to prevent canvas tainting
+    const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 
     img.onload = () => {
+      // Use the natural dimensions of the SVG
       const { width, height } = img;
-      canvas.width = width + 40;
-      canvas.height = height + 40;
+      canvas.width = width + 40; // Add padding
+      canvas.height = height + 40; // Add padding
 
+      // Fill background
       ctx.fillStyle = "#FAFAFA";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // Draw image in the center of the padding
       ctx.drawImage(img, 20, 20);
 
+      // Export and download
       const pngUrl = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = pngUrl;
@@ -127,7 +131,6 @@ export default function MermaidVisualizerPage() {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
     };
 
     img.onerror = () => {
@@ -136,9 +139,9 @@ export default function MermaidVisualizerPage() {
         title: "Download Failed",
         description: "Could not load the SVG into an image.",
       });
-      URL.revokeObjectURL(url);
     };
 
+    img.crossOrigin = "anonymous"; // Necessary for canvas tainting prevention
     img.src = url;
   };
 
