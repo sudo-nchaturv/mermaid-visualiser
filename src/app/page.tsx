@@ -106,7 +106,7 @@ export default function MermaidVisualizerPage() {
       return;
     }
     
-    const scale = 2; // Increase resolution
+    const scale = 10; // Increase resolution
     const padding = 20 * scale;
 
     const img = new Image();
@@ -127,7 +127,7 @@ export default function MermaidVisualizerPage() {
       a.href = pngUrl;
       a.download = "mermaid-diagram.png";
       document.body.appendChild(a);
-a.click();
+      a.click();
       document.body.removeChild(a);
     };
 
