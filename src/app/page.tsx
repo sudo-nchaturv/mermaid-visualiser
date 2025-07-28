@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import mermaid from "mermaid";
-import { detectMermaidErrors } from "@/ai/flows/mermaid-error-detection";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Download,
-  BotMessageSquare,
+  CheckCircle,
   Loader2,
   AlertCircle,
 } from "lucide-react";
@@ -43,7 +42,6 @@ export default function MermaidVisualizerPage() {
   const [code, setCode] = useState(exampleCode);
   const [svg, setSvg] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isAiChecking, setIsAiChecking] = useState(false);
   const [isRendering, setIsRendering] = useState(false);
   const { toast } = useToast();
 
@@ -57,7 +55,7 @@ export default function MermaidVisualizerPage() {
     });
   }, []);
 
-  const renderAndCheck = useCallback(async (codeToRender: string) => {
+  const renderDiagram = useCallback(async (codeToRender: string) => {
     if (!codeToRender.trim()) {
       setSvg("");
       setError(null);
@@ -65,8 +63,7 @@ export default function MermaidVisualizerPage() {
     }
 
     setIsRendering(true);
-    setIsAiChecking(true);
-    let mermaidError: string | null = null;
+    setError(null);
 
     try {
       await mermaid.parse(codeToRender);
@@ -76,30 +73,16 @@ export default function MermaidVisualizerPage() {
       );
       setSvg(renderedSvg);
     } catch (e: any) {
-      mermaidError = e.message || "Invalid Mermaid syntax from renderer.";
+      setError(e.message || "Invalid Mermaid syntax.");
       setSvg("");
     } finally {
       setIsRendering(false);
     }
-
-    try {
-      const result = await detectMermaidErrors({ code: codeToRender });
-      if (!result.isValid) {
-        setError(result.errorMessage);
-      } else {
-        setError(mermaidError);
-      }
-    } catch (aiError) {
-      console.error("AI error check failed:", aiError);
-      setError(mermaidError);
-    } finally {
-      setIsAiChecking(false);
-    }
   }, []);
 
   useEffect(() => {
-    renderAndCheck(debouncedCode);
-  }, [debouncedCode, renderAndCheck]);
+    renderDiagram(debouncedCode);
+  }, [debouncedCode, renderDiagram]);
 
   const handleDownload = () => {
     if (!svg) {
@@ -159,7 +142,7 @@ export default function MermaidVisualizerPage() {
     img.src = url;
   };
 
-  const isLoading = isRendering || isAiChecking;
+  const isLoading = isRendering;
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-body">
@@ -205,19 +188,19 @@ export default function MermaidVisualizerPage() {
                     <AlertCircle className="h-4 w-4" />
                   )}
                   <AlertTitle className="font-headline">
-                    {isLoading ? "Processing..." : "Error Detected"}
+                    {isLoading ? "Rendering..." : "Error Detected"}
                   </AlertTitle>
                   <AlertDescription>
                     {error ||
-                      "Checking your code and rendering the diagram..."}
+                      "Rendering the diagram..."}
                   </AlertDescription>
                 </Alert>
               ) : (
                 <Alert>
-                  <BotMessageSquare className="h-4 w-4" />
-                  <AlertTitle className="font-headline">AI Assistant</AlertTitle>
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertTitle className="font-headline">All Good!</AlertTitle>
                   <AlertDescription>
-                    Your Mermaid code looks good! The preview is on the right.
+                    Your Mermaid code is valid. The preview is on the right.
                   </AlertDescription>
                 </Alert>
               )}
@@ -253,7 +236,7 @@ export default function MermaidVisualizerPage() {
       <footer className="py-6 md:px-8 md:py-0 border-t">
         <div className="container flex flex-col items-center justify-center gap-4 md:h-24 md:flex-row">
           <p className="text-center text-sm leading-loose text-muted-foreground">
-            Built with Next.js, ShadCN/UI, and Genkit.
+            Built with Next.js and ShadCN/UI.
           </p>
         </div>
       </footer>
